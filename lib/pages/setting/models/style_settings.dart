@@ -362,6 +362,12 @@ List<SettingsModel> get styleSettings => [
     leading: const Icon(Icons.toc_outlined),
   ),
   NormalModel(
+    onTap: (context, setState) => Get.toNamed('/rcmdFollowSetting'),
+    title: '推荐页关注更新',
+    subtitle: '选择在推荐页顶部显示的UP主',
+    leading: const Icon(Icons.push_pin_outlined),
+  ),
+  NormalModel(
     onTap: (context, setState) => Get.toNamed(
       '/barSetting',
       arguments: {

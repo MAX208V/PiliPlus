@@ -1047,4 +1047,8 @@ abstract final class Pref {
 
   static bool get enableEmoteTooltip =>
       _setting.get(SettingBoxKey.enableEmoteTooltip, defaultValue: false);
+
+  static List<int> get rcmdFollowMids => List<int>.from(
+    _setting.get(SettingBoxKey.rcmdFollowMids, defaultValue: <int>[]),
+  );
 }

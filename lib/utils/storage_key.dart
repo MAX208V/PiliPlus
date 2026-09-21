@@ -157,7 +157,8 @@ abstract final class SettingBoxKey {
       angleDegrees = 'angleDegrees',
       liveStream = 'liveStream',
       enableDocProvider = 'enableDocProvider',
-      enableEmoteTooltip = 'enableEmoteTooltip';
+      enableEmoteTooltip = 'enableEmoteTooltip',
+      rcmdFollowMids = 'rcmdFollowMids';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',

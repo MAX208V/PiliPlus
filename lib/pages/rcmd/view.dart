@@ -2,9 +2,11 @@ import 'package:PiliPlus/common/skeleton/video_card_v.dart';
 import 'package:PiliPlus/common/sliver_single_child_delegate.dart';
 import 'package:PiliPlus/common/style.dart';
 import 'package:PiliPlus/common/widgets/flutter/refresh_indicator.dart';
+import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_v.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/models/follow_video_item.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/grid.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
@@ -39,6 +41,8 @@ class _RcmdPageState extends State<RcmdPage>
           controller: controller.scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
+            // 关注更新区域
+            _buildFollowSection(colorScheme),
             SliverPadding(
               padding: const .only(top: Style.cardSpace, bottom: 100),
               sliver: Obx(
@@ -58,6 +62,79 @@ class _RcmdPageState extends State<RcmdPage>
     childAspectRatio: Style.aspectRatio,
     mainAxisExtent: MediaQuery.textScalerOf(context).scale(90),
   );
+
+  /// 关注更新区域
+  Widget _buildFollowSection(ColorScheme colorScheme) {
+    return Obx(() {
+      final mids = Pref.rcmdFollowMids;
+      if (mids.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+      if (controller.followLoading.value) {
+        return SliverToBoxAdapter(
+          child: Container(
+            height: 160,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        );
+      }
+
+      final videos = controller.followVideos;
+      if (videos.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+      return SliverToBoxAdapter(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 8, bottom: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.push_pin_outlined, size: 16, color: colorScheme.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    '关注更新',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => Get.toNamed('/rcmdFollowSetting'),
+                    child: Text(
+                      '管理',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.outline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: videos.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  return _FollowVideoCard(video: videos[index]);
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    });
+  }
 
   Widget _buildBody(
     ColorScheme colorScheme,
@@ -138,4 +215,92 @@ class _RcmdPageState extends State<RcmdPage>
       child: VideoCardVSkeleton(),
     ),
   );
+}
+
+/// 关注更新视频卡片（横向小卡片）
+class _FollowVideoCard extends StatelessWidget {
+  final FollowVideoItemModel video;
+
+  const _FollowVideoCard({required this.video});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.of(context);
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: () {
+        if (video.bvid != null) {
+          // 跳转视频详情页
+          Get.toNamed(
+            '/video',
+            parameters: {
+              'aid': video.aid?.toString() ?? '',
+              'bvid': video.bvid ?? '',
+              'cover': video.cover ?? '',
+              'title': video.title,
+            },
+          );
+        }
+      },
+      child: SizedBox(
+        width: 120,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 封面
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                children: [
+                  NetworkImgLayer(
+                    src: video.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(8),
+                    ),
+                  ),
+                  // UP主头像
+                  Positioned(
+                    left: 4,
+                    bottom: 4,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: NetworkImgLayer(
+                        type: .avatar,
+                        src: video.ownerFace,
+                        width: 22,
+                        height: 22,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 标题
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+              child: Text(
+                video.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  height: 1.3,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
