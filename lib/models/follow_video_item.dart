@@ -1,5 +1,6 @@
 import 'package:PiliPlus/models/dynamics/result.dart';
 import 'package:PiliPlus/models/model_rec_video_item.dart';
+import 'package:PiliPlus/models/model_video.dart';
 
 /// 从动态数据转换而来的视频卡片模型，用于推荐页顶部「关注更新」区域
 class FollowVideoItemModel extends BaseRcmdVideoItemModel {
