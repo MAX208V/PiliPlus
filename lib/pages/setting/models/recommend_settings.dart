@@ -100,4 +100,10 @@ List<SettingsModel> get recommendSettings => [
     defaultVal: true,
     onChanged: (value) => RecommendFilter.applyFilterToRelatedVideos = value,
   ),
+  NormalModel(
+    onTap: (context, setState) => Get.toNamed('/rcmdFollowSetting'),
+    title: '推荐页关注更新',
+    subtitle: '选择在推荐页顶部显示的UP主',
+    leading: const Icon(Icons.push_pin_outlined),
+  ),
 ];
