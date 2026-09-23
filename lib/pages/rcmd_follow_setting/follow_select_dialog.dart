@@ -1,9 +1,8 @@
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
-import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
+import 'package:PiliPlus/common/widgets/pendant_avatar.dart';
 import 'package:PiliPlus/http/follow.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
-import 'package:PiliPlus/pages/follow/widgets/follow_item.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -111,13 +110,12 @@ class _FollowSelectSheetState extends State<_FollowSelectSheet> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    final padding = MediaQuery.viewPaddingOf(context);
 
     return Column(
       children: [
         // 顶部栏
         Container(
-          padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           child: Row(
             children: [
               Expanded(
@@ -176,11 +174,80 @@ class _FollowSelectSheetState extends State<_FollowSelectSheet> {
         final item = followList[index];
         final isSelected = selectedMids.contains(item.mid);
 
-        return FollowItem(
+        return _FollowSelectItem(
           item: item,
-          onSelect: (_) => _toggle(item.mid),
+          isSelected: isSelected,
+          onTap: () => _toggle(item.mid),
         );
       },
+    );
+  }
+}
+
+/// 复用 FollowItem 布局，增加选中状态
+class _FollowSelectItem extends StatelessWidget {
+  final FollowItemModel item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _FollowSelectItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.of(context);
+
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              PendantAvatar(
+                size: 45,
+                badgeSize: 14,
+                item.face,
+                officialType: item.officialVerify?.type,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  spacing: 3,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.uname!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    if (item.sign != null)
+                      Text(
+                        item.sign!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colorScheme.outline,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(
+                isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: isSelected ? colorScheme.primary : colorScheme.outline,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

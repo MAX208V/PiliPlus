@@ -221,7 +221,7 @@ class _RcmdPageState extends State<RcmdPage>
   );
 }
 
-/// 关注更新视频卡片（横向小卡片）
+/// 关注更新视频卡片（复用推荐卡片风格）
 class _FollowVideoCard extends StatelessWidget {
   final FollowVideoItemModel video;
 
@@ -260,61 +260,67 @@ class _FollowVideoCard extends StatelessWidget {
         }
       },
       child: SizedBox(
-        width: 120,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 封面
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                children: [
-                  NetworkImgLayer(
-                    src: video.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(8),
-                    ),
-                  ),
-                  // UP主头像
-                  Positioned(
-                    left: 4,
-                    bottom: 4,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.surface,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: NetworkImgLayer(
-                        type: .avatar,
-                        src: video.ownerFace,
-                        width: 22,
-                        height: 22,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // 标题
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-              child: Text(
-                video.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  height: 1.3,
-                  color: colorScheme.onSurface,
+        width: 200,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 封面（16:9）
+              AspectRatio(
+                aspectRatio: Style.aspectRatio,
+                child: NetworkImgLayer(
+                  src: video.cover,
+                  width: double.infinity,
+                  height: double.infinity,
                 ),
               ),
-            ),
-          ],
+              // 内容区
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 标题
+                      Expanded(
+                        child: Text(
+                          video.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(height: 1.38),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      // UP主信息：头像 + 名称
+                      Row(
+                        children: [
+                          NetworkImgLayer(
+                            type: .avatar,
+                            src: video.ownerFace,
+                            width: 18,
+                            height: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              video.owner?.name ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colorScheme.outline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
