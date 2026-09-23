@@ -221,7 +221,7 @@ class _RcmdPageState extends State<RcmdPage>
   );
 }
 
-/// 关注更新视频卡片（复用推荐卡片风格）
+/// 关注更新视频卡片
 class _FollowVideoCard extends StatelessWidget {
   final FollowVideoItemModel video;
 
@@ -243,7 +243,7 @@ class _FollowVideoCard extends StatelessWidget {
           Get.find<RcmdController>().markVideoSeen(aid);
         } catch (_) {}
 
-        // 先获取 cid（复用 VideoCardV 的逻辑）
+        // 先获取 cid
         int? cid;
         if (await SearchHttp.ab2cWithDimension(aid: aid, bvid: bvid)
             case final res?) {
@@ -260,67 +260,72 @@ class _FollowVideoCard extends StatelessWidget {
         }
       },
       child: SizedBox(
-        width: 200,
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 封面（16:9）
-              AspectRatio(
-                aspectRatio: Style.aspectRatio,
-                child: NetworkImgLayer(
-                  src: video.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-              ),
-              // 内容区
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 标题
-                      Expanded(
-                        child: Text(
-                          video.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(height: 1.38),
+        width: 150,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 封面
+            AspectRatio(
+              aspectRatio: Style.aspectRatio,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  NetworkImgLayer(
+                    src: video.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  // UP主头像
+                  Positioned(
+                    left: 6,
+                    bottom: 6,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      // UP主信息：头像 + 名称
-                      Row(
-                        children: [
-                          NetworkImgLayer(
-                            type: .avatar,
-                            src: video.ownerFace,
-                            width: 18,
-                            height: 18,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              video.owner?.name ?? '',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: colorScheme.outline,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: NetworkImgLayer(
+                        type: .avatar,
+                        src: video.ownerFace,
+                        width: 20,
+                        height: 20,
                       ),
-                    ],
+                    ),
                   ),
+                ],
+              ),
+            ),
+            // 标题
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+              child: Text(
+                video.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.3,
                 ),
               ),
-            ],
-          ),
+            ),
+            // UP主名
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 2, 4, 0),
+              child: Text(
+                video.owner?.name ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.outline,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -94,7 +94,10 @@ class RcmdController extends CommonListController {
           if (response.items != null && response.items!.isNotEmpty) {
             // 只取第一个视频类型的动态
             for (final item in response.items!) {
-              if (item.modules.moduleDynamic?.major?.archive != null) {
+              final archive = item.modules.moduleDynamic?.major?.archive;
+              if (archive != null) {
+                // debug: 打印封面字段
+                print('[FollowVideo] aid=${archive.aid}, cover=${archive.cover}, title=${archive.title}');
                 final video = FollowVideoItemModel.fromDynamic(item);
                 // 过滤已看视频
                 if (video.aid != null && !_seenAids.contains(video.aid)) {
