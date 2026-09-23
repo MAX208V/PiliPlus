@@ -1,5 +1,6 @@
 import 'package:PiliPlus/http/video.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
+import 'package:PiliPlus/pages/rcmd_follow_setting/follow_select_dialog.dart';
 import 'package:PiliPlus/pages/setting/models/model.dart';
 import 'package:PiliPlus/utils/recommend_filter.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
@@ -101,7 +102,7 @@ List<SettingsModel> get recommendSettings => [
     onChanged: (value) => RecommendFilter.applyFilterToRelatedVideos = value,
   ),
   NormalModel(
-    onTap: (context, setState) => Get.toNamed('/rcmdFollowSetting'),
+    onTap: (context, setState) => showFollowSelectDialog(context),
     title: '推荐页关注更新',
     subtitle: '选择在推荐页顶部显示的UP主',
     leading: const Icon(Icons.push_pin_outlined),
