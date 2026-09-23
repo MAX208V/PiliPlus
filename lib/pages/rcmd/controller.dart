@@ -21,7 +21,7 @@ class RcmdController extends CommonListController {
   RxList<FollowVideoItemModel> followVideos = <FollowVideoItemModel>[].obs;
   RxBool followLoading = false.obs;
   late final RxList<int> followMids = RxList<int>(Pref.rcmdFollowMids);
-  final Set<int> _seenAids = Set<int>.from(Pref.rcmdFollowSeenAids);
+  Set<int> _seenAids = Set<int>.from(Pref.rcmdFollowSeenAids);
 
   @override
   bool get isEnd => false;
