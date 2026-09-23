@@ -1,13 +1,12 @@
-import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/http/follow.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
+import 'package:PiliPlus/pages/follow/widgets/follow_item.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -90,17 +89,12 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final titleMedium = TextTheme.of(context).titleMedium!;
-
     return AlertDialog(
       clipBehavior: Clip.hardEdge,
       title: const Text('选择关注UP主'),
-      constraints: const BoxConstraints.tightFor(width: 320, height: 480),
-      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-      content: Material(
-        type: .transparency,
-        child: _buildContent(titleMedium),
-      ),
+      constraints: const BoxConstraints.tightFor(width: 360, height: 520),
+      contentPadding: EdgeInsets.zero,
+      content: _buildContent(),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -114,7 +108,7 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
     );
   }
 
-  Widget _buildContent(TextStyle titleMedium) {
+  Widget _buildContent() {
     if (error != null && followList.isEmpty) {
       return Center(
         heightFactor: 3,
@@ -123,15 +117,14 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
     }
 
     if (followList.isEmpty && isLoading) {
-      return m3eLoading;
+      return const SizedBox(height: 200, child: Center(child: m3eLoading));
     }
 
     final itemCount = followList.length + (hasMore ? 1 : 0);
 
     return SizedBox(
-      height: 400,
+      height: 420,
       child: ListView.builder(
-        shrinkWrap: true,
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (index == followList.length) {
@@ -145,9 +138,9 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
           final item = followList[index];
           final isSelected = selectedMids.contains(item.mid);
 
-          return CheckboxListTile(
-            value: isSelected,
-            onChanged: (value) {
+          return FollowItem(
+            item: item,
+            onSelect: (userModel) {
               setState(() {
                 if (isSelected) {
                   selectedMids.remove(item.mid);
@@ -156,14 +149,6 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
                 }
               });
             },
-            secondary: NetworkImgLayer(
-              type: .avatar,
-              src: item.face,
-              width: 36,
-              height: 36,
-            ),
-            title: Text(item.uname ?? '', style: titleMedium),
-            dense: true,
           );
         },
       ),

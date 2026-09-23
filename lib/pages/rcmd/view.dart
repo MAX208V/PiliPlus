@@ -6,10 +6,13 @@ import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
 import 'package:PiliPlus/common/widgets/loading_widget/http_error.dart';
 import 'package:PiliPlus/common/widgets/video_card/video_card_v.dart';
 import 'package:PiliPlus/http/loading_state.dart';
+import 'package:PiliPlus/http/search.dart';
 import 'package:PiliPlus/models/follow_video_item.dart';
 import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/pages/rcmd_follow_setting/follow_select_dialog.dart';
 import 'package:PiliPlus/utils/grid.dart';
+import 'package:PiliPlus/utils/id_utils.dart';
+import 'package:PiliPlus/utils/page_utils.dart';
 import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -227,20 +230,27 @@ class _FollowVideoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    final theme = Theme.of(context);
 
     return GestureDetector(
-      onTap: () {
-        if (video.bvid != null) {
-          // 跳转视频详情页
-          Get.toNamed(
-            '/video',
-            parameters: {
-              'aid': video.aid?.toString() ?? '',
-              'bvid': video.bvid ?? '',
-              'cover': video.cover ?? '',
-              'title': video.title,
-            },
+      onTap: () async {
+        final bvid = video.bvid;
+        if (bvid == null) return;
+        final aid = video.aid;
+        if (aid == null) return;
+
+        // 先获取 cid（复用 VideoCardV 的逻辑）
+        int? cid;
+        if (await SearchHttp.ab2cWithDimension(aid: aid, bvid: bvid)
+            case final res?) {
+          cid = res.cid;
+        }
+        if (cid != null) {
+          PageUtils.toVideoPage(
+            aid: aid,
+            bvid: bvid,
+            cid: cid,
+            cover: video.cover,
+            title: video.title,
           );
         }
       },
