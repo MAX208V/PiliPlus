@@ -20,6 +20,7 @@ class RcmdController extends CommonListController {
   // 关注更新
   RxList<FollowVideoItemModel> followVideos = <FollowVideoItemModel>[].obs;
   RxBool followLoading = false.obs;
+  late final RxList<int> followMids = RxList<int>(Pref.rcmdFollowMids);
 
   @override
   bool get isEnd => false;
@@ -72,7 +73,7 @@ class RcmdController extends CommonListController {
 
   /// 加载关注UP主的最新视频
   Future<void> loadFollowVideos() async {
-    final mids = Pref.rcmdFollowMids;
+    final mids = followMids.toList();
     if (mids.isEmpty) {
       followVideos.clear();
       return;
@@ -110,6 +111,7 @@ class RcmdController extends CommonListController {
   /// 更新关注列表并刷新
   Future<void> updateFollowMids(List<int> mids) async {
     await GStorage.setting.put(SettingBoxKey.rcmdFollowMids, mids);
+    followMids.assignAll(mids);
     loadFollowVideos();
   }
 }

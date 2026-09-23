@@ -66,7 +66,7 @@ class _RcmdPageState extends State<RcmdPage>
   /// 关注更新区域
   Widget _buildFollowSection(ColorScheme colorScheme) {
     return Obx(() {
-      final mids = Pref.rcmdFollowMids;
+      final mids = controller.followMids;
       if (mids.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
       if (controller.followLoading.value) {
