@@ -158,7 +158,7 @@ abstract final class SettingBoxKey {
       liveStream = 'liveStream',
       enableDocProvider = 'enableDocProvider',
       enableEmoteTooltip = 'enableEmoteTooltip',
-      rcmdFollowMids = 'rcmdFollowMids';
+      rcmdFollowMids = 'rcmdFollowMids',
       rcmdFollowSeenAids = 'rcmdFollowSeenAids';
 
   static const String minimizeOnExit = 'minimizeOnExit',
