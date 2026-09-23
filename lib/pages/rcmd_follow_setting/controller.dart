@@ -5,32 +5,34 @@ import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 
 class RcmdFollowSettingController extends GetxController {
   final account = Accounts.main;
-  RxList<int> selectedMids = <int>[].obs;
-  RxList<FollowItemModel> followList = <FollowItemModel>[].obs;
-  RxBool isLoading = false.obs;
-  int page = 1;
+  List<int> selectedMids = [];
+  List<FollowItemModel> followList = [];
+  bool isLoading = false;
   bool hasMore = true;
+  int page = 1;
+  String? error;
 
-  @override
-  void onInit() {
-    super.onInit();
-    selectedMids.assignAll(Pref.rcmdFollowMids);
+  void init() {
+    selectedMids = List<int>.from(Pref.rcmdFollowMids);
     loadFollowList();
   }
 
   Future<void> loadFollowList() async {
     if (!account.isLogin) {
-      SmartDialog.showToast('请先登录');
+      error = '请先登录';
+      update();
       return;
     }
 
-    isLoading.value = true;
+    isLoading = true;
+    error = null;
+    update();
+
     final res = await FollowHttp.followings(
       vmid: account.mid,
       pn: page,
@@ -40,25 +42,23 @@ class RcmdFollowSettingController extends GetxController {
     if (res case Success(:final response)) {
       if (response.list != null && response.list!.isNotEmpty) {
         if (page == 1) {
-          followList.assignAll(response.list!);
+          followList = response.list!;
         } else {
-          followList.addAll(response.list!);
+          followList = [...followList, ...response.list!];
         }
         hasMore = response.list!.length >= 50;
       } else {
         hasMore = false;
+        if (followList.isEmpty) {
+          error = '暂无关注用户';
+        }
       }
     } else {
-      SmartDialog.showToast('加载失败');
+      error = '加载失败';
     }
 
-    isLoading.value = false;
-  }
-
-  Future<void> loadMore() async {
-    if (isLoading.value || !hasMore) return;
-    page++;
-    await loadFollowList();
+    isLoading = false;
+    update();
   }
 
   void toggleMid(int mid) {
@@ -67,18 +67,16 @@ class RcmdFollowSettingController extends GetxController {
     } else {
       selectedMids.add(mid);
     }
+    update();
   }
 
   Future<void> saveSettings() async {
-    await GStorage.setting.put(
-      SettingBoxKey.rcmdFollowMids,
-      selectedMids.toList(),
-    );
+    await GStorage.setting.put(SettingBoxKey.rcmdFollowMids, selectedMids);
     SmartDialog.showToast('保存成功');
 
     try {
       final rcmdController = Get.find<RcmdController>();
-      rcmdController.updateFollowMids(selectedMids.toList());
+      rcmdController.updateFollowMids(selectedMids);
     } catch (_) {}
 
     Get.back();

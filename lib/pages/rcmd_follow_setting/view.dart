@@ -1,80 +1,95 @@
 import 'package:PiliPlus/common/widgets/image/network_img_layer.dart';
+import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/pages/rcmd_follow_setting/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RcmdFollowSettingPage extends StatelessWidget {
+class RcmdFollowSettingPage extends StatefulWidget {
   const RcmdFollowSettingPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(RcmdFollowSettingController());
-    final colorScheme = ColorScheme.of(context);
+  State<RcmdFollowSettingPage> createState() => _RcmdFollowSettingPageState();
+}
 
+class _RcmdFollowSettingPageState extends State<RcmdFollowSettingPage> {
+  late final RcmdFollowSettingController controller;
+  late EdgeInsets padding;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(RcmdFollowSettingController());
+    controller.init();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    padding = MediaQuery.viewPaddingOf(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SimpleScaffold(
       appBar: AppBar(
-        title: const Text('关注更新设置'),
+        title: const Text('推荐页关注更新'),
         actions: [
-          Obx(() {
-            final count = controller.selectedMids.length;
-            return TextButton(
-              onPressed: controller.saveSettings,
-              child: Text('保存($count)'),
-            );
-          }),
+          TextButton(
+            onPressed: controller.saveSettings,
+            child: const Text('保存'),
+          ),
+          SizedBox(width: padding.right > 0 ? padding.right : 12),
         ],
       ),
-      body: Obx(() {
-        if (controller.followList.isEmpty && controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      body: GetBuilder<RcmdFollowSettingController>(
+        init: controller,
+        builder: (controller) {
+          if (controller.error != null && controller.followList.isEmpty) {
+            return Center(child: Text(controller.error!));
+          }
 
-        if (controller.followList.isEmpty) {
-          return const Center(child: Text('暂无关注用户'));
-        }
+          if (controller.followList.isEmpty && controller.isLoading) {
+            return m3eLoading;
+          }
 
-        return ListView.builder(
-          itemCount: controller.followList.length + 1,
-          itemBuilder: (context, index) {
-            if (index == controller.followList.length) {
-              if (controller.hasMore) {
-                controller.loadMore();
+          return ListView.builder(
+            padding: EdgeInsets.only(bottom: padding.bottom + 100),
+            itemCount: controller.followList.length + (controller.hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == controller.followList.length) {
+                controller.loadFollowList();
                 return const Padding(
                   padding: EdgeInsets.all(16),
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
-              return const SizedBox.shrink();
-            }
 
-            final item = controller.followList[index];
-            final isSelected = controller.selectedMids.contains(item.mid);
+              final item = controller.followList[index];
+              final isSelected = controller.selectedMids.contains(item.mid);
 
-            return ListTile(
-              leading: NetworkImgLayer(
-                type: .avatar,
-                src: item.face,
-                width: 40,
-                height: 40,
-              ),
-              title: Text(item.uname ?? ''),
-              subtitle: Text(
-                'UID: ${item.mid}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.outline,
-                ),
-              ),
-              trailing: Checkbox(
+              return CheckboxListTile(
                 value: isSelected,
                 onChanged: (_) => controller.toggleMid(item.mid),
-              ),
-              onTap: () => controller.toggleMid(item.mid),
-            );
-          },
-        );
-      }),
+                secondary: NetworkImgLayer(
+                  type: .avatar,
+                  src: item.face,
+                  width: 40,
+                  height: 40,
+                ),
+                title: Text(item.uname ?? ''),
+                subtitle: Text(
+                  'UID: ${item.mid}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
