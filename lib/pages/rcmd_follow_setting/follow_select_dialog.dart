@@ -123,7 +123,7 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
     }
 
     if (followList.isEmpty && isLoading) {
-      return Center(heightFactor: 3, child: M3ELoadingIndicator());
+      return m3eLoading;
     }
 
     final itemCount = followList.length + (hasMore ? 1 : 0);
