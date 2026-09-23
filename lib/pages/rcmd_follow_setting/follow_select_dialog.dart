@@ -7,6 +7,7 @@ import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -122,7 +123,7 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
     }
 
     if (followList.isEmpty && isLoading) {
-      return const Center(heightFactor: 3, child: M3ELoadingIndicator());
+      return Center(heightFactor: 3, child: M3ELoadingIndicator());
     }
 
     final itemCount = followList.length + (hasMore ? 1 : 0);
