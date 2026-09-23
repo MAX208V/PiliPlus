@@ -1051,4 +1051,8 @@ abstract final class Pref {
   static List<int> get rcmdFollowMids => List<int>.from(
     _setting.get(SettingBoxKey.rcmdFollowMids, defaultValue: <int>[]),
   );
+
+  static List<int> get rcmdFollowSeenAids => List<int>.from(
+    _setting.get(SettingBoxKey.rcmdFollowSeenAids, defaultValue: <int>[]),
+  );
 }

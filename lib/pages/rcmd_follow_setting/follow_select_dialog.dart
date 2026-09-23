@@ -1,4 +1,5 @@
 import 'package:PiliPlus/common/widgets/loading_widget/loading_widget.dart';
+import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/http/follow.dart';
 import 'package:PiliPlus/http/loading_state.dart';
 import 'package:PiliPlus/models_new/follow/list.dart';
@@ -7,7 +8,6 @@ import 'package:PiliPlus/pages/rcmd/controller.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/storage.dart';
 import 'package:PiliPlus/utils/storage_key.dart';
-import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,9 +19,18 @@ Future<void> showFollowSelectDialog(BuildContext context) async {
     return;
   }
 
-  final result = await showDialog<List<int>>(
+  final result = await showModalBottomSheet<List<int>>(
     context: context,
-    builder: (context) => _FollowSelectDialog(accountMid: account.mid),
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (context) => DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) =>
+          _FollowSelectSheet(accountMid: account.mid),
+    ),
   );
 
   if (result != null) {
@@ -34,15 +43,15 @@ Future<void> showFollowSelectDialog(BuildContext context) async {
   }
 }
 
-class _FollowSelectDialog extends StatefulWidget {
+class _FollowSelectSheet extends StatefulWidget {
   final int accountMid;
-  const _FollowSelectDialog({required this.accountMid});
+  const _FollowSelectSheet({required this.accountMid});
 
   @override
-  State<_FollowSelectDialog> createState() => _FollowSelectDialogState();
+  State<_FollowSelectSheet> createState() => _FollowSelectSheetState();
 }
 
-class _FollowSelectDialogState extends State<_FollowSelectDialog> {
+class _FollowSelectSheetState extends State<_FollowSelectSheet> {
   List<FollowItemModel> followList = [];
   late Set<int> selectedMids;
   bool isLoading = true;
@@ -88,71 +97,89 @@ class _FollowSelectDialogState extends State<_FollowSelectDialog> {
     }
   }
 
+  void _toggle(int mid) {
+    setState(() {
+      if (selectedMids.contains(mid)) {
+        selectedMids.remove(mid);
+      } else {
+        selectedMids.add(mid);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      clipBehavior: Clip.hardEdge,
-      title: const Text('选择关注UP主'),
-      constraints: const BoxConstraints.tightFor(width: 360, height: 520),
-      contentPadding: EdgeInsets.zero,
-      content: _buildContent(),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+    final colorScheme = ColorScheme.of(context);
+    final padding = MediaQuery.viewPaddingOf(context);
+
+    return Column(
+      children: [
+        // 顶部栏
+        Container(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '选择关注UP主',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).pop(selectedMids.toList()),
+                child: Text('保存(${selectedMids.length})'),
+              ),
+            ],
+          ),
         ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(selectedMids.toList()),
-          child: Text('保存(${selectedMids.length})'),
-        ),
+        Divider(height: 1),
+        // 列表
+        Expanded(child: _buildList()),
       ],
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildList() {
     if (error != null && followList.isEmpty) {
       return Center(
-        heightFactor: 3,
-        child: Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.outline)),
+        child: Text(error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.outline)),
       );
     }
 
     if (followList.isEmpty && isLoading) {
-      return const SizedBox(height: 200, child: Center(child: m3eLoading));
+      return const Center(child: m3eLoading);
     }
 
     final itemCount = followList.length + (hasMore ? 1 : 0);
 
-    return SizedBox(
-      height: 420,
-      child: ListView.builder(
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          if (index == followList.length) {
-            _loadFollowList();
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          final item = followList[index];
-          final isSelected = selectedMids.contains(item.mid);
-
-          return FollowItem(
-            item: item,
-            onSelect: (userModel) {
-              setState(() {
-                if (isSelected) {
-                  selectedMids.remove(item.mid);
-                } else {
-                  selectedMids.add(item.mid);
-                }
-              });
-            },
+    return ListView.builder(
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index == followList.length) {
+          _loadFollowList();
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
           );
-        },
-      ),
+        }
+
+        final item = followList[index];
+        final isSelected = selectedMids.contains(item.mid);
+
+        return FollowItem(
+          item: item,
+          onSelect: (_) => _toggle(item.mid),
+        );
+      },
     );
   }
 }

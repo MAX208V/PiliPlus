@@ -238,6 +238,11 @@ class _FollowVideoCard extends StatelessWidget {
         final aid = video.aid;
         if (aid == null) return;
 
+        // 标记为已看
+        try {
+          Get.find<RcmdController>().markVideoSeen(aid);
+        } catch (_) {}
+
         // 先获取 cid（复用 VideoCardV 的逻辑）
         int? cid;
         if (await SearchHttp.ab2cWithDimension(aid: aid, bvid: bvid)

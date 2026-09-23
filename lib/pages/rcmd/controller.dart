@@ -21,6 +21,7 @@ class RcmdController extends CommonListController {
   RxList<FollowVideoItemModel> followVideos = <FollowVideoItemModel>[].obs;
   RxBool followLoading = false.obs;
   late final RxList<int> followMids = RxList<int>(Pref.rcmdFollowMids);
+  final Set<int> _seenAids = Set<int>.from(Pref.rcmdFollowSeenAids);
 
   @override
   bool get isEnd => false;
@@ -94,7 +95,11 @@ class RcmdController extends CommonListController {
             // 只取第一个视频类型的动态
             for (final item in response.items!) {
               if (item.modules.moduleDynamic?.major?.archive != null) {
-                results.add(FollowVideoItemModel.fromDynamic(item));
+                final video = FollowVideoItemModel.fromDynamic(item);
+                // 过滤已看视频
+                if (video.aid != null && !_seenAids.contains(video.aid)) {
+                  results.add(video);
+                }
                 break;
               }
             }
@@ -106,6 +111,19 @@ class RcmdController extends CommonListController {
     await Future.wait(futures);
     followVideos.assignAll(results);
     followLoading.value = false;
+  }
+
+  /// 标记视频为已看
+  void markVideoSeen(int? aid) {
+    if (aid == null) return;
+    _seenAids.add(aid);
+    // 持久化（保留最近200条）
+    final list = _seenAids.toList();
+    if (list.length > 200) {
+      _seenAids = Set<int>.from(list.sublist(list.length - 200));
+    }
+    GStorage.setting.put(SettingBoxKey.rcmdFollowSeenAids, _seenAids.toList());
+    followVideos.removeWhere((v) => v.aid == aid);
   }
 
   /// 更新关注列表并刷新

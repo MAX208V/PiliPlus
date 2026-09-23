@@ -159,6 +159,7 @@ abstract final class SettingBoxKey {
       enableDocProvider = 'enableDocProvider',
       enableEmoteTooltip = 'enableEmoteTooltip',
       rcmdFollowMids = 'rcmdFollowMids';
+      rcmdFollowSeenAids = 'rcmdFollowSeenAids';
 
   static const String minimizeOnExit = 'minimizeOnExit',
       windowSize = 'windowSize',

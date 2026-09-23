@@ -1083,7 +1083,7 @@ class DynamicArchiveModel {
     aid = safeToInt(json['aid']);
     badge = json['badge'] == null ? null : Badge.fromJson(json['badge']);
     bvid = json['bvid'] ?? json['epid'].toString() ?? ' ';
-    cover = json['cover'];
+    cover = json['cover'] ?? json['pic'];
     durationText = json['duration_text'];
     jumpUrl = json['jump_url'];
     stat = json['stat'] != null ? Stat.fromJson(json['stat']) : null;
